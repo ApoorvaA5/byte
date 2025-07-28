@@ -15,7 +15,7 @@ export const StockRow = ({ stock, index }: StockRowProps) => {
     <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200`}>
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
-          <div className="text-sm font-semibold text-gray-900">
+          <div className="text-sm font-semibold text-gray-900 max-w-xs">
             {stock.particulars}
           </div>
           <div className="text-xs text-gray-500 font-medium">
@@ -28,7 +28,7 @@ export const StockRow = ({ stock, index }: StockRowProps) => {
         {formatCurrency(stock.purchasePrice)}
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
         {stock.quantity}
       </td>
       
@@ -36,12 +36,12 @@ export const StockRow = ({ stock, index }: StockRowProps) => {
         {formatCurrency(stock.investment)}
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
         {stock.portfolioPercent.toFixed(2)}%
       </td>
       
       <td className="px-6 py-4 whitespace-nowrap">
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800">
           {stock.exchange}
         </span>
       </td>
@@ -63,11 +63,11 @@ export const StockRow = ({ stock, index }: StockRowProps) => {
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-        {stock.peRatio.toFixed(1)}
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+        {stock.peRatio > 0 ? stock.peRatio.toFixed(1) : 'N/A'}
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs">
         {stock.latestEarnings}
       </td>
     </tr>
