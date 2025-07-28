@@ -43,6 +43,12 @@ export const SectorGroup = ({ sectorSummary }: SectorGroupProps) => {
               </span>
             </div>
             <div>
+              <span className="text-gray-600">Portfolio %: </span>
+              <span className="font-medium">
+                {sectorSummary.portfolioPercent.toFixed(1)}%
+              </span>
+            </div>
+            <div>
               <span className="text-gray-600">Present Value: </span>
               <span className="font-medium">
                 {formatCurrency(sectorSummary.totalPresentValue)}
