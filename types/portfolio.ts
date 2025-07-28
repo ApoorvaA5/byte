@@ -17,6 +17,7 @@ export interface CalculatedStock extends Stock {
   presentValue: number;
   gainLoss: number;
   gainLossPercent: number;
+  marketCap?: number;
 }
 
 export interface SectorSummary {
@@ -25,6 +26,7 @@ export interface SectorSummary {
   totalPresentValue: number;
   totalGainLoss: number;
   gainLossPercent: number;
+  portfolioPercent: number;
   stocks: CalculatedStock[];
 }
 
