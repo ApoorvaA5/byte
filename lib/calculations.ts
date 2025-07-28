@@ -32,11 +32,14 @@ export const groupBySector = (stocks: CalculatedStock[]): SectorSummary[] => {
     return acc;
   }, {} as Record<string, CalculatedStock[]>);
 
+  const totalPortfolioInvestment = stocks.reduce((sum, stock) => sum + stock.investment, 0);
+
   return Object.entries(sectorMap).map(([sector, stocks]) => {
     const totalInvestment = stocks.reduce((sum, stock) => sum + stock.investment, 0);
     const totalPresentValue = stocks.reduce((sum, stock) => sum + stock.presentValue, 0);
     const totalGainLoss = totalPresentValue - totalInvestment;
     const gainLossPercent = (totalGainLoss / totalInvestment) * 100;
+    const portfolioPercent = (totalInvestment / totalPortfolioInvestment) * 100;
 
     return {
       sector,
@@ -44,9 +47,10 @@ export const groupBySector = (stocks: CalculatedStock[]): SectorSummary[] => {
       totalPresentValue,
       totalGainLoss,
       gainLossPercent,
+      portfolioPercent,
       stocks
     };
-  });
+  }).sort((a, b) => b.totalInvestment - a.totalInvestment); // Sort by investment amount
 };
 
 export const calculatePortfolioSummary = (stocks: CalculatedStock[]): PortfolioSummary => {
