@@ -69,11 +69,11 @@ export const fetchMultipleStockPrices = async (symbols: string[]): Promise<Recor
     
     // Fetch quotes in batches to avoid rate limiting
     const batchSize = 10;
-    const batches: string[][] = [];
-    
-    for (let i = 0; i < yahooSymbols.length; i += batchSize) {
-      batches.push(yahooSymbols.slice(i, i + batchSize));
-    }
+const batches: string[][] = [];
+
+for (let i = 0; i < yahooSymbols.length; i += batchSize) {
+  batches.push(yahooSymbols.slice(i, i + batchSize));
+}
     
     for (const batch of batches) {
       try {
