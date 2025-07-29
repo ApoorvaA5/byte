@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Stock, CalculatedStock } from '@/types/portfolio';
 import { mockStocks, simulatePriceUpdate } from '@/lib/mockData';
+import { fetchMultipleStockPrices } from '@/lib/yahooFinance';
 import { calculateStockMetrics } from '@/lib/calculations';
 
 export const usePortfolio = () => {
@@ -11,8 +12,10 @@ export const usePortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isLiveMode, setIsLiveMode] = useState(false);
+  const [marketStatus, setMarketStatus] = useState<string>('UNKNOWN');
 
-  const updatePrices = useCallback(() => {
+  const updatePricesSimulated = useCallback(() => {
     try {
       setStocks(prevStocks => 
         prevStocks.map(stock => ({
@@ -28,22 +31,61 @@ export const usePortfolio = () => {
     }
   }, []);
 
+  const updatePricesLive = useCallback(async () => {
+    try {
+      setError(null);
+      const symbols = stocks.map(stock => stock.symbol);
+      const livePrices = await fetchMultipleStockPrices(symbols);
+      
+      setStocks(prevStocks => 
+        prevStocks.map(stock => ({
+          ...stock,
+          cmp: livePrices[stock.symbol] || stock.cmp
+        }))
+      );
+      
+      setLastUpdated(new Date());
+    } catch (err) {
+      setError('Failed to fetch live stock prices');
+      console.error('Error fetching live prices:', err);
+      // Fallback to simulated prices if live fetch fails
+      updatePricesSimulated();
+    }
+  }, [stocks, updatePricesSimulated]);
+
+  const toggleLiveMode = useCallback(() => {
+    setIsLiveMode(prev => !prev);
+  }, []);
+
   const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // In a real application, this would fetch from actual APIs
-      setStocks(mockStocks);
+      if (isLiveMode) {
+        // Try to fetch live prices for initial load
+        const symbols = mockStocks.map(stock => stock.symbol);
+        const livePrices = await fetchMultipleStockPrices(symbols);
+        
+        const updatedStocks = mockStocks.map(stock => ({
+          ...stock,
+          cmp: livePrices[stock.symbol] || stock.cmp
+        }));
+        
+        setStocks(updatedStocks);
+      } else {
+        setStocks(mockStocks);
+      }
+      
       setError(null);
     } catch (err) {
       setError('Failed to fetch portfolio data');
       console.error('Error fetching data:', err);
+      // Fallback to mock data
+      setStocks(mockStocks);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isLiveMode]);
 
   useEffect(() => {
     fetchInitialData();
@@ -55,21 +97,30 @@ export const usePortfolio = () => {
   }, [stocks]);
 
   useEffect(() => {
-    // Update prices every 15 seconds
-    const interval = setInterval(updatePrices, 15000);
+    // Update prices every 30 seconds for live mode, 15 seconds for simulation
+    const updateInterval = isLiveMode ? 30000 : 15000;
+    const updateFunction = isLiveMode ? updatePricesLive : updatePricesSimulated;
+    
+    const interval = setInterval(updateFunction, updateInterval);
     return () => clearInterval(interval);
-  }, [updatePrices]);
+  }, [isLiveMode, updatePricesLive, updatePricesSimulated]);
 
   const refreshData = useCallback(() => {
-    fetchInitialData();
-  }, [fetchInitialData]);
+    if (isLiveMode) {
+      updatePricesLive();
+    } else {
+      updatePricesSimulated();
+    }
+  }, [isLiveMode, updatePricesLive, updatePricesSimulated]);
 
   return {
     stocks: calculatedStocks,
     loading,
     error,
     lastUpdated,
+    isLiveMode,
+    marketStatus,
     refreshData,
-    updatePrices
+    toggleLiveMode
   };
 };
