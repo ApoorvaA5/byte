@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { RefreshCw, TrendingUp, TrendingDown, Activity } from 'lucide-react';
 import { PortfolioSummary } from '@/types/portfolio';
 import { formatCurrency, formatPercentage } from '@/lib/calculations';
@@ -9,14 +10,24 @@ interface PortfolioHeaderProps {
   lastUpdated: Date;
   onRefresh: () => void;
   isLoading: boolean;
+  isLiveMode: boolean;
+  onToggleLiveMode: () => void;
 }
 
 export const PortfolioHeader = ({ 
   summary, 
   lastUpdated, 
   onRefresh, 
-  isLoading 
+  isLoading,
+  isLiveMode,
+  onToggleLiveMode
 }: PortfolioHeaderProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isPositive = summary.totalGainLoss >= 0;
 
   return (
@@ -29,8 +40,21 @@ export const PortfolioHeader = ({
           <p className="text-gray-600 text-base sm:text-lg">Real-time performance tracking and analytics</p>
         </div>
         <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onToggleLiveMode}
+              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all duration-200 ${
+                isLiveMode 
+                  ? 'bg-green-100 text-green-800 border border-green-200' 
+                  : 'bg-gray-100 text-gray-600 border border-gray-200'
+              }`}
+            >
+              {isLiveMode ? '🔴 LIVE' : '📊 DEMO'}
+            </button>
+          </div>
           <span className="text-sm text-gray-500">
-            Last updated: {lastUpdated.toLocaleTimeString()}
+            Last updated: {mounted ? lastUpdated.toLocaleTimeString() : '--:--:--'}
+            {isLiveMode && <span className="ml-1 text-green-600">• Live Data</span>}
           </span>
           <button
             onClick={onRefresh}
@@ -38,7 +62,7 @@ export const PortfolioHeader = ({
             className="flex items-center space-x-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
+            <span>{isLiveMode ? 'Fetch Live' : 'Refresh'}</span>
           </button>
         </div>
       </div>
