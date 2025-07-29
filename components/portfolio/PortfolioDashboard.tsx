@@ -9,7 +9,15 @@ import { groupBySector, calculatePortfolioSummary } from '@/lib/calculations';
 import { AlertCircle } from 'lucide-react';
 
 export const PortfolioDashboard = () => {
-  const { stocks, loading, error, lastUpdated, refreshData } = usePortfolio();
+  const { 
+    stocks, 
+    loading, 
+    error, 
+    lastUpdated, 
+    isLiveMode, 
+    refreshData, 
+    toggleLiveMode 
+  } = usePortfolio();
 
   const portfolioSummary = useMemo(() => 
     calculatePortfolioSummary(stocks), [stocks]
@@ -63,6 +71,8 @@ export const PortfolioDashboard = () => {
           lastUpdated={lastUpdated}
           onRefresh={refreshData}
           isLoading={loading}
+          isLiveMode={isLiveMode}
+          onToggleLiveMode={toggleLiveMode}
         />
 
         <div className="space-y-6">
@@ -77,10 +87,20 @@ export const PortfolioDashboard = () => {
         <div className="mt-12 bg-white rounded-xl p-6 shadow-md border border-gray-200">
           <div className="text-center text-sm text-gray-500 space-y-2">
             <p className="flex items-center justify-center space-x-2">
-              <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span>Portfolio updates automatically every 15 seconds</span>
+              <span className={`h-2 w-2 rounded-full animate-pulse ${
+                isLiveMode ? 'bg-green-500' : 'bg-blue-500'
+              }`}></span>
+              <span>
+                Portfolio updates automatically every {isLiveMode ? '30' : '15'} seconds
+                {isLiveMode ? ' with live Yahoo Finance data' : ' with simulated data'}
+              </span>
             </p>
-            <p>Data simulated for demonstration purposes • Real-time market integration available</p>
+            <p>
+              {isLiveMode 
+                ? 'Live data from Yahoo Finance • Toggle to demo mode for faster updates'
+                : 'Demo mode with simulated data • Toggle to live mode for real Yahoo Finance data'
+              }
+            </p>
           </div>
         </div>
       </div>

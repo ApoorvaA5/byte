@@ -1,8 +1,24 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { TrendingUp, Mail, Phone, MapPin, Github, Linkedin, Twitter } from 'lucide-react';
 
 export const Footer = () => {
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -117,13 +133,13 @@ export const Footer = () => {
           <div className="flex items-center justify-center space-x-8 text-xs">
             <div className="flex items-center space-x-2">
               <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-gray-300">Market Open</span>
+              <span className="text-gray-300">Yahoo Finance Integration Active</span>
             </div>
             <div className="text-gray-400">
-              Last Updated: {new Date().toLocaleTimeString()}
+              Last Updated: {mounted ? currentTime : '--:--:--'}
             </div>
             <div className="text-gray-400">
-              Data provided for demonstration purposes
+              Live & Demo modes available
             </div>
           </div>
         </div>

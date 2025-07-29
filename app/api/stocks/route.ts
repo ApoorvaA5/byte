@@ -1,23 +1,46 @@
 import { NextResponse } from 'next/server';
-import { mockStocks, simulatePriceUpdate } from '@/lib/mockData';
+import { mockStocks } from '@/lib/mockData';
+import { fetchMultipleStockPrices } from '@/lib/yahooFinance';
 
-// Simulate API endpoint for stock data
-export async function GET() {
+// API endpoint for stock data with live Yahoo Finance integration
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get('mode') || 'demo';
+  
   try {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // In a real application, this would fetch from Yahoo Finance and Google Finance APIs
-    const updatedStocks = mockStocks.map(stock => ({
-      ...stock,
-      cmp: simulatePriceUpdate(stock.cmp)
-    }));
+    if (mode === 'live') {
+      // Fetch live prices from Yahoo Finance
+      const symbols = mockStocks.map(stock => stock.symbol);
+      const livePrices = await fetchMultipleStockPrices(symbols);
+      
+      const updatedStocks = mockStocks.map(stock => ({
+        ...stock,
+        cmp: livePrices[stock.symbol] || stock.cmp
+      }));
+      
+      return NextResponse.json({
+        stocks: updatedStocks,
+        mode: 'live',
+        timestamp: new Date().toISOString(),
+        pricesUpdated: Object.keys(livePrices).length
+      });
+    } else {
+      // Return mock data for demo mode
+      return NextResponse.json({
+        stocks: mockStocks,
+        mode: 'demo',
+        timestamp: new Date().toISOString()
+      });
+    }
 
-    return NextResponse.json(updatedStocks);
   } catch (error) {
     console.error('Error fetching stock data:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch stock data' },
+      { 
+        error: 'Failed to fetch stock data',
+        fallback: mockStocks,
+        mode: 'fallback'
+      },
       { status: 500 }
     );
   }
