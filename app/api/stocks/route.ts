@@ -1,3 +1,6 @@
+// Ensure this API route is always treated as dynamic (not statically cached)
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { mockStocks } from '@/lib/mockData';
 import { fetchMultipleStockPrices } from '@/lib/yahooFinance';
